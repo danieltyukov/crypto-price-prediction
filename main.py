@@ -21,12 +21,13 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 scaled_data = scaler.fit_transform(data['Close'].values.reshape(-1,1))
 
 predict_days = 60
+future_day = 30
 
 x_train, y_train = [], []
 
-for x in range(predict_days, len(scaled_data)):
+for x in range(predict_days, len(scaled_data)-future_day):
     x_train.append(scaled_data[x-predict_days:x, 0])
-    y_train.append(scaled_data[x, 0])
+    y_train.append(scaled_data[x+future_day, 0])
 
 x_train, y_train = np.array(x_train), np.array(y_train)
 x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
@@ -67,3 +68,20 @@ x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
 
 predict_prices = model.predict(x_test)
 predict_prices = scaler.inverse_transform(predict_prices)
+
+plt.plot(actual_prices, color='black', label='Actual Prices')
+plt.plot(predict_prices, color='blue', label='Predicted Prices')
+plt.title(f'{crypto_currency} price prediction')
+plt.xlabel('Time')
+plt.ylabel('Price')
+plt.legend(loc='upper left')
+plt.show()
+
+#future prediction
+real_data = [model_inputs[len(model_inputs)+1-predict_days:len(model_inputs)+1, 0]]
+real_data = np.array(real_data)
+real_data = np.reshape(real_data, (real_data.shape[0], real_data.shape[1], 1))
+
+prediction = model.predict(real_data)
+prediction = scaler.inverse_transform(prediction)
+print()
